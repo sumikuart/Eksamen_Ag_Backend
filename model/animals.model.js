@@ -5,34 +5,35 @@ let animals = new schema({
 
     id: {
         type:Number,
+        default: 0
     },
     title: {
         type:String,
-        default: 'Error  - title'
+        default: 'Kommer senere'
     },
     content: {
         type:String,
-        default: 'Error  - content'
+        default: 'Kommer senere'
     },
     image: {
         type:String,
-        default: 'Error  - image'
+        default: 'Kommer senere'
     },
     daysInCare: {
-        type:Number,
-        default: 0
+        type:String,
+        default: '0'
     },
     age: {
         type:String,
-        default: ""
+        default: "Kommer senere"
     },
     sex: {
         type:String,
-        default: ""
+        default: "Kommer senere"
     },
     details: {
         type:String,
-        default: ""
+        default: "Kommer senere"
     }
 
 });

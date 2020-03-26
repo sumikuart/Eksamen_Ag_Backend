@@ -5,7 +5,7 @@ const cors = require('cors');
 const PORT = 6464
 const mongoose = require('mongoose')
 const myRoutes = express.Router();
-
+const multer = require('multer');
 
 app.use(cors());
 app.use(bodyparser.json())
@@ -121,6 +121,9 @@ myRoutes.route('/get/adopt').get(function(req,res){
 })
 
 //*************************************************************** */ Animals Håndtering. 
+
+//---------------------------hent animal
+// Alle Dyr
 myRoutes.route('/get/animals').get(function(req,res){
     animalsmodel.find({},function(err, adopt){
         if(err) {
@@ -132,7 +135,10 @@ myRoutes.route('/get/animals').get(function(req,res){
     })
 })
 
-//*************************************************************** */ DetaljeVisning Håndtering. 
+
+//---------------------------detaljer animal
+
+//detaljeVisning Håndtering. 
 myRoutes.route('/get/animal/:id').get(function(req,res){
     let animal_id = req.params.id;
 
@@ -144,6 +150,94 @@ myRoutes.route('/get/animal/:id').get(function(req,res){
         }
     })
 })
+
+
+//---------------------------opdater animal
+
+//opdatere animal
+myRoutes.route('/edit/animal/:id').post(function(req,res){
+    animalsmodel.findById(req.params.id, function(err, animal){
+    if (!animal) {
+        res.status(400).send('data not found')
+    } else {
+        animal.id = req.body.id
+        animal.title = req.body.title
+        animal.content = req.body.content
+        animal.image = req.body.image
+        animal.daysInCare = req.body.daysInCare
+        animal.age = req.body.age
+        animal.sex = req.body.sex
+        animal.details = req.body.details
+
+        animal.save().then(animal => {  
+            res.json('Animal Update')
+        }).catch(err => {
+            res.status(400).send("update fail.")
+        })
+    }
+})
+});
+
+
+//---------------------------opret animal
+
+// SET UP UPLOADE: 
+// først hvor den skal gemmes og hvordan navent skal være
+var storagevar = multer.diskStorage({
+    destination: function(req, file, cb) {
+        cb(null, 'assets/animals');
+    },
+    filename: function (req, file, cb){
+        cb(null,file.originalname)
+    }
+});
+
+// Sætter vi uploade single functionen op. den høre til singeluploade.component:
+var upload = multer({ storage:storagevar}).single('file');
+
+// forbinder med frontend omkring Billeder:
+app.post('/add/animalImage', function(req, res){
+    upload(req, res, function(err){
+        if(err){
+            console.log('An error has accurd in single upload post function');
+            return res.status(500).json(err)
+        }
+
+        return res.status(200).send(req.file)
+    })
+})
+
+// forbinder med frontend omkring resten af data:
+myRoutes.route('/add/Animal').post(function(req, res){
+
+    let animalData = new animalsmodel(req.body);
+
+    animalData.save().then(n => {
+        res.status(200).json('Animal Added')
+    }).catch(err => {
+        res.status(400).send('an Error has accured in -add Animal- ')
+    })
+})
+
+
+//---------------------------Delete animal
+
+myRoutes.delete('/delete/animal/:id', function(req, res){
+    animalsmodel.findByIdAndRemove(req.params.id, (err, user) => {
+        if(err){
+            console.log('An Error has accurd in -delete/animal/id-  endpoint');
+            return res.status(500).send('an Error has accured in status(500) in-delete/animal/id- endpoint(delete part)')
+        }
+
+        const response ={
+            massage: "Animal is deleted",
+            id:user._id
+        }
+
+        return res.status(200).send(response)
+    })
+})
+
 
 
 //*************************************************************** */ Admin Håndtering. 
